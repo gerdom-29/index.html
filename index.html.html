@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FincoAnalytics Benchmark - Crédito de Vehículos y Taxis</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- LÓGICA DE NEGOCIO Y MODELO DE DATOS EN JAVASCRIPT (Registrado correctamente para Alpine.js) -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('appState', () => ({
+                activeTab: 'dashboard',
+                selectedNicheFilter: 'Todos',
+                selectedProcessFilter: 'Todos',
+                searchQuery: '',
+
+                // Estado del simulador
+                simNiche: 'Empleados',
+                simAmount: 40000000,
+                simTerm: 60,
+                customFincoRate: 1.35,
+                selectedSimCompetitor: 'Davivienda',
+
+                rawBenchmarkData: [
+                    // Nicho: Empleados
+                    {
+                        niche: "Empleados",
+                        entity: "Davivienda",
+                        rate: 1.23,
+                        term: "6 - 84",
+                        termMax: 84,
+                        time: "Minutos",
+                        timeHours: 0.1,
+                        requirements: "Certificado laboral (<60 días), extractos de últimos 3 meses.",
+                        process: "Digital",
+                        badge: "Líder en Tasa"
+                    },
+                    {
+                        niche: "Empleados",
+                        entity: "Banco de Bogotá",
+                        rate: 1.37,
+                        term: "Hasta 84",
+                        termMax: 84,
+                        time: "Minutos",
+                        timeHours: 0.1,
+                        requirements: "Antigüedad de 6 meses (indefinido) o 12 meses (fijo). Continuidad demostrable.",
+                        process: "Digital",
+                        badge: "Sólido Digital"
+                    },
+                    {
+                        niche: "Empleados",
+                        entity: "Finanzuto",
+                        rate: 1.79,
+                        term: "Según vehículo",
+                        termMax: 72,
+                        time: "48 Horas",
+                        timeHours: 48,
+                        requirements: "Certificación laboral (<30 días). Tasas preferenciales para eléctricos/híbridos.",
+                        process: "Híbrido",
+                        badge: "Sostenible"
+                    },
+                    {
+                        niche: "Empleados",
+                        entity: "Alta Originadora",
+                        rate: 1.80,
+                        term: "24 - 72",
+                        termMax: 72,
+                        time: "48 Horas",
+                        timeHours: 48,
+                        requirements: "Carta laboral, desprendibles de nómina (2-3 meses) y extractos (3 meses).",
+                        process: "Híbrido",
+                        badge: "Flexible"
+                    },
+                    {
+                        niche: "Empleados",
+                        entity: "Banco W",
+                        rate: 2.13,
+                        term: "48 - 72",
+                        termMax: 72,
+                        time: "1 a 3 días hábiles",
+                        timeHours: 72,
+                        requirements: "Carta laboral, certificado de ingresos y retenciones, declaración de renta.",
+                        process: "Presencial",
+                        badge: "Microcrédito"
+                    },
+                    {
+                        niche: "Empleados",
+                        entity: "Finandina",
+                        rate: 2.93,
+                        term: "24 - 72",
+                        termMax: 72,
+                        time: "Horas",
+                        timeHours: 4,
+                        requirements: "Certificación laboral, ingresos y retenciones, extractos (ingresos extra).",
+                        process: "Digital",
+                        badge: "Aprobación Rápida"
+                    },
+
+                    // Nicho: Pensionados
+                    {
+                        niche: "Pensionados",
+                        entity: "Davivienda",
+                        rate: 1.23,
+                        term: "6 - 84",
+                        termMax: 84,
+                        time: "Minutos",
+                        timeHours: 0.1,
+                        requirements: "Último comprobante de pago de pensión, extractos bancarios de 3 meses.",
+                        process: "Digital",
+                        badge: "Líder en Tasa"
+                    },
+                    {
+                        niche: "Pensionados",
+                        entity: "Finandina",
+                        rate: 1.62,
+                        term: "60 - 120",
+                        termMax: 120,
+                        time: "Horas",
+                        timeHours: 4,
+                        requirements: "Comprobantes de pago (3 meses), extractos. Mesada mínima desde 1 SMMLV.",
+                        process: "Digital",
+                        badge: "Plazo Extendido"
+                    },
+                    {
+                        niche: "Pensionados",
+                        entity: "Finanzuto",
+                        rate: 1.79,
+                        term: "Según vehículo",
+                        termMax: 72,
+                        time: "72 Horas",
+                        timeHours: 72,
+                        requirements: "No especifica requisitos adicionales en política pública.",
+                        process: "Híbrido",
+                        badge: "Híbrido"
+                    },
+                    {
+                        niche: "Pensionados",
+                        entity: "Alta Originadora",
+                        rate: 1.80,
+                        term: "24 - 72",
+                        termMax: 72,
+                        time: "48 Horas",
+                        timeHours: 48,
+                        requirements: "Edad máx. 70-75 años al finalizar. Comprobantes (3 meses), resolución de pensión.",
+                        process: "Híbrido",
+                        badge: "Senior Friendly"
+                    },
+                    {
+                        niche: "Pensionados",
+                        entity: "Banco W",
+                        rate: 2.13,
+                        term: "48 - 72",
+                        termMax: 72,
+                        time: "1 a 3 días hábiles",
+                        timeHours: 72,
+                        requirements: "Resolución de pensión, dos últimos desprendibles, extractos o certificados.",
+                        process: "Presencial",
+                        badge: "Tradicional"
+                    },
+
+                    // Nicho: Transportadores
+                    {
+                        niche: "Transportadores",
+                        entity: "Banco de Bogotá",
+                        rate: 1.37,
+                        term: "Hasta 84",
+                        termMax: 84,
+                        time: "Minutos",
+                        timeHours: 0.1,
+                        requirements: "Tener mínimo 1 año de experiencia en el sector transportador.",
+                        process: "Digital",
+                        badge: "Líder Experiencia"
+                    },
+                    {
+                        niche: "Transportadores",
+                        entity: "Finandina",
+                        rate: 1.39,
+                        term: "24 - 72",
+                        termMax: 72,
+                        time: "Horas",
+                        timeHours: 4,
+                        requirements: "RUT/Cámara de Comercio, extractos (3 meses), tarjeta de propiedad.",
+                        process: "Híbrido",
+                        badge: "Socio de Negocio"
+                    },
+                    {
+                        niche: "Transportadores",
+                        entity: "Finanzuto",
+                        rate: 1.79,
+                        term: "Según vehículo",
+                        termMax: 72,
+                        time: "72 Horas",
+                        timeHours: 72,
+                        requirements: "Certificación de ingresos de empresas donde percibe ingresos por vehículos propios.",
+                        process: "Híbrido",
+                        badge: "Híbrido"
+                    },
+                    {
+                        niche: "Transportadores",
+                        entity: "Alta Originadora",
+                        rate: 1.80,
+                        term: "24 - 72",
+                        termMax: 72,
+                        time: "48 Horas",
+                        timeHours: 48,
+                        requirements: "Copia de tarjeta de propiedad, certificación de la empresa de transporte vinculada.",
+                        process: "Híbrido",
+                        badge: "Soporte Empresa"
+                    },
+                    {
+                        niche: "Transportadores",
+                        entity: "Davivienda",
+                        rate: 1.89,
+                        term: "6 - 84",
+                        termMax: 84,
+                        time: "Minutos",
+                        timeHours: 0.1,
+                        requirements: "Prenda sobre taxi, empresa/persona natural con negocio, experiencia 1 año. Taxi máx 6 años de antigüedad.",
+                        process: "Digital",
+                        badge: "Restricción Antigüedad"
+                    },
+                    {
+                        niche: "Transportadores",
+                        entity: "Banco W",
+                        rate: 2.13,
+                        term: "48 - 72",
+                        termMax: 72,
+                        time: "1 a 3 días hábiles",
+                        timeHours: 72,
+                        requirements: "Fotocopia de tarjeta de propiedad, carta de vinculación con placa y antigüedad.",
+                        process: "Presencial",
+                        badge: "Inclusivo"
+                    },
+
+                    // Nicho: Rentistas de Capital
+                    {
+                        niche: "Rentistas de Capital",
+                        entity: "Finandina",
+                        rate: 1.39,
+                        term: "24 - 72",
+                        termMax: 72,
+                        time: "Horas",
+                        timeHours: 4,
+                        requirements: "RUT o Cámara de Comercio actualizado, extractos de los últimos 3 meses.",
+                        process: "Híbrido",
+                        badge: "Agilidad"
+                    },
+                    {
+                        niche: "Rentistas de Capital",
+                        entity: "Finanzuto",
+                        rate: 1.79,
+                        term: "Según vehículo",
+                        termMax: 72,
+                        time: "60 Horas",
+                        timeHours: 60,
+                        requirements: "Declaración de renta del último año, extractos de 3 meses o contratos de trabajo.",
+                        process: "Híbrido",
+                        badge: "Híbrido"
+                    },
+                    {
+                        niche: "Rentistas de Capital",
+                        entity: "Alta Originadora",
+                        rate: 1.80,
+                        term: "24 - 72",
+                        termMax: 72,
+                        time: "48 Horas",
+                        timeHours: 48,
+                        requirements: "RUT, Cámara de Comercio, extractos (3 meses) y soportes de negocio (facturas, contratos).",
+                        process: "Híbrido",
+                        badge: "Documentación"
+                    },
+                    {
+                        niche: "Rentistas de Capital",
+                        entity: "Davivienda",
+                        rate: 1.89,
+                        term: "6 - 84",
+                        termMax: 84,
+                        time: "Minutos",
+                        timeHours: 0.1,
+                        requirements: "Extractos de 3 meses, declaración de renta (Formularios 210 o 260) de los últimos 2 años.",
+                        process: "Digital",
+                        badge: "Exigencia Fiscal"
+                    }
+                ],
+
+                fincomercioStrategies: [
+                    {
+                        id: "A",
+                        title: "Onboarding Digital y Motor de Scoring en Tiempo Real",
+                        pillar: "Tecnología",
+                        marketPractice: "Davivienda y Banco de Bogotá procesan solicitudes en minutos mediante motores de scoring automático.",
+                        implementation: "Integrar un simulador avanzado conectado vía API con centrales de riesgo e historial de aportes de Fincomercio para viabilidad inmediata.",
+                        impact: "Alto",
+                        cost: "Medio-Alto",
+                        priority: "Alta"
+                    },
+                    {
+                        id: "B",
+                        title: "Mitigación del Riesgo e Inclusión vía Open Finance",
+                        pillar: "Riesgos",
+                        marketPractice: "Finandina y Finanzuto migran a procesos híbridos rápidos con extractos digitales verificados.",
+                        implementation: "Implementar agregadores de Open Banking para transportadores e independientes, validando flujos de caja reales sin requerir papel.",
+                        impact: "Muy Alto",
+                        cost: "Medio",
+                        priority: "Alta"
+                    },
+                    {
+                        id: "C",
+                        title: "Línea Especial 'FincoMovilidad Verde'",
+                        pillar: "Sostenibilidad",
+                        marketPractice: "Finanzuto y banca masiva ofrecen tasas preferenciales exclusivas para eléctricos/híbridos.",
+                        implementation: "Crear un portafolio verde fondeado con banca multilateral a menor costo, trasladando una tasa preferencial al asociado.",
+                        impact: "Medio-Alto",
+                        cost: "Bajo-Medio",
+                        priority: "Media"
+                    },
+                    {
+                        id: "D",
+                        title: "Estructuración Flexibilizada para Taxis (Garantías Cruzadas)",
+                        pillar: "Garantías",
+                        marketPractice: "AvaCréditos exige hasta 70% inicial para taxi+cupo. Davivienda limita la antigüedad a 6 años.",
+                        implementation: "Financiar hasta el 90% combinando la prenda del vehículo con la pignoración de aportes sociales. Ampliar antigüedad a 8 años para usados.",
+                        impact: "Crítico (Core)",
+                        cost: "Bajo",
+                        priority: "Alta"
+                    },
+                    {
+                        id: "E",
+                        title: "Estrategia B2B2C y Ecosistema de Alianzas",
+                        pillar: "Comercial",
+                        marketPractice: "Alta Originadora opera con fuerzas externas integradas directo en concesionarios.",
+                        implementation: "Pactos de exclusividad con marcas y cooperativas de taxi. Financiar 'matrícula + seguro gratis' el primer año.",
+                        impact: "Alto",
+                        cost: "Medio",
+                        priority: "Alta"
+                    }
+                ],
+
+                // Métodos computados para filtros
+                get filteredData() {
+                    return this.rawBenchmarkData.filter(item => {
+                        const matchNiche = this.selectedNicheFilter === 'Todos' || item.niche === this.selectedNicheFilter;
+                        const matchProcess = this.selectedProcessFilter === 'Todos' || item.process === this.selectedProcessFilter;
+                        const matchSearch = this.searchQuery === '' ||
+                            item.entity.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            item.requirements.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            item.badge.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchNiche && matchProcess && matchSearch;
+                    });
+                },
+
+                get stats() {
+                    const list = this.filteredData.length > 0 ? this.filteredData : this.rawBenchmarkData;
+                    const sortedAsc = [...list].sort((a, b) => a.rate - b.rate);
+                    const sortedDesc = [...list].sort((a, b) => b.rate - a.rate);
+                    const lowest = sortedAsc[0];
+                    const highest = sortedDesc[0];
+                    const digitalCount = list.filter(item => item.process === 'Digital').length;
+                    const digitalPercentage = Math.round((digitalCount / list.length) * 100);
+
+                    return {
+                        lowestRate: lowest ? lowest.rate : 1.23,
+                        lowestRateEntity: lowest ? `${lowest.entity} (${lowest.niche})` : 'Davivienda',
+                        highestRate: highest ? highest.rate : 2.93,
+                        highestRateEntity: highest ? `${highest.entity} (${highest.niche})` : 'Finandina',
+                        digitalPercentage
+                    };
+                },
+
+                get simCompetitors() {
+                    return this.rawBenchmarkData.filter(item => item.niche === this.simNiche);
+                },
+
+                get activeCompetitorObj() {
+                    let comp = this.simCompetitors.find(c => c.entity === this.selectedSimCompetitor);
+                    if (!comp) {
+                        comp = this.simCompetitors[0] || this.rawBenchmarkData[0];
+                    }
+                    return comp;
+                },
+
+                onSimNicheChange(n) {
+                    this.simNiche = n;
+                    const defaultComp = this.simCompetitors.find(c => c.entity === 'Davivienda') || this.simCompetitors[0];
+                    if (defaultComp) {
+                        this.selectedSimCompetitor = defaultComp.entity;
+                    }
+                },
+
+                calculateMonthlyFee(amount, ratePercent, months) {
+                    const r = (ratePercent / 100);
+                    if (r === 0) return amount / months;
+                    return (amount * r) / (1 - Math.pow(1 + r, -months));
+                },
+
+                get competitorFee() {
+                    return this.calculateMonthlyFee(this.simAmount, this.activeCompetitorObj.rate, this.simTerm);
+                },
+
+                get fincomercioFee() {
+                    return this.calculateMonthlyFee(this.simAmount, this.customFincoRate, this.simTerm);
+                },
+
+                get monthlySavings() {
+                    return this.competitorFee - this.fincomercioFee;
+                },
+
+                get totalSavings() {
+                    return this.monthlySavings * this.simTerm;
+                }
+            }));
+        });
+    </script>
+
+    <!-- Alpine.js CDN con atributo defer para inicialización asíncrona segura -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        /* Custom scrollbar para mantener la estética limpia clara */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 font-sans min-h-screen flex flex-col antialiased bg-slate-50" x-data="appState()" x-cloak>
+
+    <!-- HEADER DE LA APLICACIÓN -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 px-6 py-4 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-600 text-white p-2.5 rounded-xl shadow-md shadow-emerald-600/10 font-bold text-xl flex items-center justify-center">
+                    FC
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-lg md:text-xl tracking-tight text-slate-900">
+                           Benchmark
+                        </h1>
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                            Colombia 2026
+                        </span>
+                    </div>
+                    <p class="text-slate-500 text-xs mt-0.5">
+                        Créditos de vehículos y taxis por nicho de Cliente
+                    </p>
+                </div>
+            </div>
+
+
+            <!-- Selector de Pestañas Principal -->
+            <nav class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 self-start md:self-auto overflow-x-auto max-w-full">
+                <button 
+                    @click="activeTab = 'dashboard'"
+                    :class="activeTab === 'dashboard' ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50 font-bold' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shrink-0"
+                >
+                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    General
+                </button>
+                <button 
+                    @click="activeTab = 'benchmark'"
+                    :class="activeTab === 'benchmark' ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50 font-bold' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shrink-0"
+                >
+                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                    Benchmark Detallado
+                </button>
+                <button 
+                    @click="activeTab = 'simulator'"
+                    :class="activeTab === 'simulator' ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50 font-bold' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shrink-0"
+                >
+                    <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Simulador Competitivo
+                </button>
+                <button 
+                    @click="activeTab = 'strategies'"
+                    :class="activeTab === 'strategies' ? 'bg-white text-slate-900 shadow-sm border border-slate-200/50 font-bold' : 'text-slate-600 hover:text-slate-900'"
+                    class="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shrink-0"
+                >
+                    <svg class="w-3.5 h-3.5 text-pink-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                    Estrategia Fincomercio
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+        
+        <!-- BANNER INFORMATIVO RESUMIDO -->
+        <div class="bg-gradient-to-r from-white to-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <span>Optimización del otorgamiento de crédito prendario</span>
+                </h2>
+                <p class="text-sm text-slate-500 mt-1 max-w-2xl">
+                                   </p>
+            </div>
+            <div class="flex gap-2">
+                <span class="bg-slate-100 text-slate-700 text-xs px-3 py-1.5 rounded-lg border border-slate-200 font-medium whitespace-nowrap">
+                    Junio de 2026
+                </span>
+                <span class="bg-emerald-100 text-emerald-800 text-xs px-3 py-1.5 rounded-lg border border-emerald-200/50 font-semibold whitespace-nowrap">
+                    
+                </span>
+            </div>
+        </div>
+
+        <!-- 1. SECCIÓN: DASHBOARD GENERAL -->
+        <div x-show="activeTab === 'dashboard'" class="space-y-6">
+            
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-emerald-300 hover:shadow-md transition-all duration-300">
+                    <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Tasa mínima del mercado (NMV)</p>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-3xl font-extrabold text-emerald-600" x-text="stats.lowestRate + '%'"></span>
+                        <span class="text-xs text-slate-600 font-medium" x-text="stats.lowestRateEntity"></span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-3 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Segmento tradicional con menor riesgo de default
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-rose-300 hover:shadow-md transition-all duration-300">
+                    <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Tasa máxima registrada (NMV)</p>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-3xl font-extrabold text-rose-600" x-text="stats.highestRate + '%'"></span>
+                        <span class="text-xs text-slate-600 font-medium" x-text="stats.highestRateEntity"></span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-3 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        Perfiles con mayor informalidad o ingresos variables
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-blue-300 hover:shadow-md transition-all duration-300">
+                    <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Digitalización del Ecosistema</p>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-3xl font-extrabold text-blue-600" x-text="stats.digitalPercentage + '%'"></span>
+                        <span class="text-xs text-slate-600 font-medium">Banca con Scoring Automático</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-3 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Evaluación automatizada de solicitudes en minutos
+                    </p>
+                </div>
+            </div>
+
+            <!-- Resumen gráfico e integración por nicho -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Rangos de tasas por nicho -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-7 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-900 text-base">Comportamiento Promedio de tasas por nicho</h3>
+                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tasa NMV promedio</span>
+                    </div>
+
+                    <div class="space-y-5 pt-2">
+                        <!-- Empleados -->
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="p-1.5 rounded-lg bg-blue-100 text-blue-700">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    </span>
+                                    <span class="font-semibold text-slate-700">Empleados</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 text-[10px] font-medium">Rango: 1,23% - 2,93%</span>
+                                    <span class="font-bold text-emerald-600">Ø 1,82% NMV</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200/50">
+                                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full" style="width: 61%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Pensionados -->
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="p-1.5 rounded-lg bg-teal-100 text-teal-700">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </span>
+                                    <span class="font-semibold text-slate-700">Pensionados</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 text-[10px] font-medium">Rango: 1,23% - 2,13%</span>
+                                    <span class="font-bold text-emerald-600">Ø 1,71% NMV</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200/50">
+                                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full" style="width: 57%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Transportadores -->
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="p-1.5 rounded-lg bg-amber-100 text-amber-700">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1-1v-4h4l4 4v4H11M17 11h3m-3-3h2"></path></svg>
+                                    </span>
+                                    <span class="font-semibold text-slate-700">Transportadores</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 text-[10px] font-medium">Rango: 1,37% - 2,13%</span>
+                                    <span class="font-bold text-emerald-600">Ø 1,73% NMV</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200/50">
+                                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full" style="width: 58%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Rentistas de Capital -->
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="p-1.5 rounded-lg bg-purple-100 text-purple-700">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    </span>
+                                    <span class="font-semibold text-slate-700">Rentistas de Capital</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 text-[10px] font-medium">Rango: 1,39% - 1,89%</span>
+                                    <span class="font-bold text-emerald-600">Ø 1,72% NMV</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200/50">
+                                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full" style="width: 57%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Posicionamiento General / Arquetipos -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-5 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Arquetipos del ecosistema</h3>
+                        <p class="text-xs text-slate-500 mt-1">Segmentación analítica del mercado de financiamiento vehicular</p>
+                        
+                        <div class="mt-4 space-y-4">
+                            <div class="flex gap-3">
+                                <div class="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0"></div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-800">Banca tradicional </h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">Davivienda y Banco de Bogotá. Fondeo robusto con tasas preferenciales (1,23% - 1,37% NMV), alta automatización pero baja flexibilidad de garantías en vehículos usados.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <div class="w-2 h-2 rounded-full bg-teal-500 mt-1.5 shrink-0"></div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-800">Bancos y financieras especializadas en vehículos</h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">Finandina, Finanzuto, Alta Originadora. Centrados en procesos ágiles o híbridos, amplias exigencias documentales y excelente respuesta a Rentistas.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <div class="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0"></div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-800">Micro-finanzas e integración social</h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">Banco W. Canal de atención tradicional/presencial. Tasas más elevadas pero con alta cobertura para sectores informales de transporte.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4">
+                        <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Oportunidad Fincomercio</span>
+                        <p class="text-[11px] text-slate-600 mt-1">
+                            Aprovechar la naturaleza cooperativa para ofrecer un esquema de garantías cruzadas (prenda sobre taxi + pignoración de aportes sociales) para mitigar el riesgo sin encarecer la tasa de interés.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Recomendaciones Clave -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Plan de acción de ventaja competitiva</h3>
+                        <p class="text-xs text-slate-500">Iniciativas recomendadascon base en el mercado</p>
+                    </div>
+                    <button 
+                        @click="activeTab = 'strategies'"
+                        class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                    >
+                        Ver plan estratégico completo
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <template x-for="strat in fincomercioStrategies" :key="strat.id">
+                        <div 
+                            @click="activeTab = 'strategies'"
+                            class="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:border-emerald-200 hover:bg-white hover:shadow-sm transition-all duration-300 cursor-pointer group flex flex-col justify-between"
+                        >
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs font-bold text-slate-400" x-text="'Pilar ' + strat.id"></span>
+                                    <span class="bg-slate-200 text-slate-700 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase" x-text="strat.pillar"></span>
+                                </div>
+                                <h4 class="text-xs font-bold text-slate-800 group-hover:text-emerald-600 transition-all duration-200 line-clamp-2" x-text="strat.title"></h4>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-[10px]">
+                                <span class="text-slate-500 font-medium">Prioridad: <strong class="text-slate-800" x-text="strat.priority"></strong></span>
+                                <span class="text-emerald-600 font-semibold flex items-center gap-0.5 group-hover:translate-x-1 transition-all">
+                                    Detalle
+                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 2. SECCIÓN: BENCHMARK DETALLADO -->
+        <div x-show="activeTab === 'benchmark'" class="space-y-6">
+            
+            <!-- Controles de Filtros y Búsqueda -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Benchmark Detallado por Nicho</h3>
+                        <p class="text-xs text-slate-500">Monitoreo dinámico de políticas de otorgamiento y condiciones de tasas en Colombia</p>
+                    </div>
+
+                    <div class="relative w-full md:w-72">
+                        <svg class="absolute left-3 top-2.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input 
+                            type="text" 
+                            placeholder="Buscar entidad o requisitos..."
+                            x-model="searchQuery"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                        />
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 pt-2 border-t border-slate-100">
+                    <!-- Filtro por Nicho -->
+                    <div class="flex flex-wrap items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
+                        <span class="text-slate-500 px-2 font-semibold">Nicho:</span>
+                        <template x-for="niche in ['Todos', 'Empleados', 'Pensionados', 'Transportadores', 'Rentistas de Capital']" :key="niche">
+                            <button
+                                @click="selectedNicheFilter = niche"
+                                :class="selectedNicheFilter === niche ? 'bg-white text-slate-900 shadow-sm font-bold border border-slate-200/40' : 'text-slate-600 hover:text-slate-900'"
+                                class="px-3 py-1.5 rounded-lg font-semibold transition-all"
+                                x-text="niche"
+                            ></button>
+                        </template>
+                    </div>
+
+                    <!-- Filtro por Tipo de Proceso -->
+                    <div class="flex flex-wrap items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
+                        <span class="text-slate-500 px-2 font-semibold">Proceso:</span>
+                        <template x-for="proc in ['Todos', 'Digital', 'Híbrido', 'Presencial']" :key="proc">
+                            <button
+                                @click="selectedProcessFilter = proc"
+                                :class="selectedProcessFilter === proc ? 'bg-white text-slate-900 shadow-sm font-bold border border-slate-200/40' : 'text-slate-600 hover:text-slate-900'"
+                                class="px-3 py-1.5 rounded-lg font-semibold transition-all"
+                                x-text="proc"
+                            ></button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla Interactiva -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
+                <div class="px-6 py-4 bg-white border-b border-slate-100 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Competidores Identificados (<span x-text="filteredData.length"></span>)
+                    </span>
+                    <span class="text-xs text-slate-400 font-medium">
+                        Tasas de referencia nominal mensual vencida (NMV)
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50">
+                                <th class="py-4 px-6">Nicho de Cliente</th>
+                                <th class="py-4 px-6">Entidad Financiera</th>
+                                <th class="py-4 px-6">Tasa (NMV)</th>
+                                <th class="py-4 px-6">Plazo Max</th>
+                                <th class="py-4 px-6">Tiempo Respuesta</th>
+                                <th class="py-4 px-6">Proceso</th>
+                                <th class="py-4 px-6">Requisitos de Política Clave</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+                            <template x-for="item in filteredData" :key="item.niche + '-' + item.entity">
+                                <tr class="hover:bg-slate-50/80 transition-colors">
+                                    <!-- Nicho -->
+                                    <td class="py-4 px-6 font-semibold text-slate-800">
+                                        <div class="flex items-center gap-1.5">
+                                            <span x-show="item.niche === 'Empleados'" class="text-blue-600">💼</span>
+                                            <span x-show="item.niche === 'Pensionados'" class="text-teal-600">👴</span>
+                                            <span x-show="item.niche === 'Transportadores'" class="text-amber-600">🚕</span>
+                                            <span x-show="item.niche === 'Rentistas de Capital'" class="text-purple-600">📈</span>
+                                            <span x-text="item.niche"></span>
+                                        </div>
+                                    </td>
+                                    <!-- Entidad -->
+                                    <td class="py-4 px-6">
+                                        <div class="font-bold text-slate-900 flex items-center gap-2">
+                                            <span x-text="item.entity"></span>
+                                            <span 
+                                                class="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                                                :class="item.rate <= 1.39 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-slate-100 text-slate-600'"
+                                                x-text="item.badge"
+                                            ></span>
+                                        </div>
+                                    </td>
+                                    <!-- Tasa -->
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-baseline gap-0.5">
+                                            <span class="font-extrabold text-sm" :class="item.rate <= 1.39 ? 'text-emerald-600' : 'text-slate-800'" x-text="item.rate + '%'"></span>
+                                            <span class="text-[9px] text-slate-400 font-bold">NMV</span>
+                                        </div>
+                                    </td>
+                                    <!-- Plazo -->
+                                    <td class="py-4 px-6 text-slate-700 font-semibold" x-text="item.term"></td>
+                                    <!-- Tiempo Respuesta -->
+                                    <td class="py-4 px-6 text-slate-600" x-text="item.time"></td>
+                                    <!-- Proceso -->
+                                    <td class="py-4 px-6">
+                                        <span 
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                            :class="{
+                                                'bg-blue-100 text-blue-800 border border-blue-200': item.process === 'Digital',
+                                                'bg-amber-100 text-amber-800 border border-amber-200': item.process === 'Híbrido',
+                                                'bg-slate-100 text-slate-700 border border-slate-300': item.process === 'Presencial'
+                                            }"
+                                            x-text="item.process"
+                                        ></span>
+                                    </td>
+                                    <!-- Requisitos -->
+                                    <td class="py-4 px-6 text-slate-500 max-w-sm font-medium leading-relaxed" x-text="item.requirements"></td>
+                                </tr>
+                            </template>
+                            <tr x-show="filteredData.length === 0">
+                                <td colspan="7" class="text-center py-12 text-slate-400 font-medium bg-slate-50/50">
+                                    No se encontraron ofertas con los filtros y búsquedas actuales.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 3. SECCIÓN: SIMULADOR DE CUOTAS COMPARATIVO -->
+        <div x-show="activeTab === 'simulator'" class="space-y-6">
+            
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <h3 class="font-bold text-slate-900 text-base">Simulador de Otorgamiento y Ahorro</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Compara el costo de tu crédito contra las políticas del competidor según el nicho de cliente e ingresa una simulación para Fincomercio.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Ajustes de la simulación -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm lg:col-span-5 space-y-5">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2.5">
+                            Nicho del Asociado
+                        </label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <template x-for="n in ['Empleados', 'Pensionados', 'Transportadores', 'Rentistas de Capital']">
+                                <button
+                                    @click="onSimNicheChange(n)"
+                                    :class="simNiche === n ? 'bg-slate-900 text-white border-slate-900 shadow-sm' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'"
+                                    class="px-3 py-2.5 rounded-xl font-bold text-xs transition-all border text-center"
+                                    x-text="n"
+                                ></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
+                            Competidor de Referencia
+                        </label>
+                        <select
+                            x-model="selectedSimCompetitor"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-xs text-slate-700 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                        >
+                            <template x-for="c in simCompetitors" :key="c.entity">
+                                <option :value="c.entity" x-text="c.entity + ' (' + c.rate + '% NMV)'"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <span>Monto de Financiación</span>
+                            <span class="text-slate-900 text-sm font-extrabold" x-text="'$ ' + Number(simAmount).toLocaleString('es-CO') + ' COP'"></span>
+                        </div>
+                        <input 
+                            type="range" 
+                            min="10000000" 
+                            max="150000000" 
+                            step="5000000"
+                            x-model="simAmount"
+                            class="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                        />
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-semibold">
+                            <span>$ 10 M</span>
+                            <span>$ 150 M</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <span>Plazo de Amortización</span>
+                            <span class="text-slate-900 text-sm font-extrabold" x-text="simTerm + ' Meses'"></span>
+                        </div>
+                        <input 
+                            type="range" 
+                            min="12" 
+                            max="120" 
+                            step="12"
+                            x-model="simTerm"
+                            class="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                        />
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-semibold">
+                            <span>1 Año</span>
+                            <span>10 Años</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                            <span>Propuesta Tasa Fincomercio</span>
+                            <span class="text-emerald-600 text-sm font-extrabold" x-text="customFincoRate + '% NMV'"></span>
+                        </div>
+                        <input 
+                            type="range" 
+                            min="0.8" 
+                            max="2.5" 
+                            step="0.05"
+                            x-model="customFincoRate"
+                            class="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                        />
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-semibold">
+                            <span>0.80% NMV</span>
+                            <span>2.50% NMV</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados del Simulador -->
+                <div class="lg:col-span-7 flex flex-col gap-6">
+                    
+                    <!-- Cuotas Mensuales -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex-1 flex flex-col justify-between">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Comparativa de Cuotas Mensuales
+                        </span>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                            <!-- Competidor -->
+                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col justify-between shadow-sm">
+                                <div>
+                                    <span class="text-xs text-slate-500 font-bold block" x-text="activeCompetitorObj.entity"></span>
+                                    <p class="text-[10px] text-slate-400 mt-0.5 font-medium" x-text="'Tasa de referencia: ' + activeCompetitorObj.rate + '% NMV'"></p>
+                                </div>
+                                <div class="mt-5">
+                                    <span class="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Cuota Mensual</span>
+                                    <span class="text-xl font-bold text-slate-700" x-text="'$ ' + Math.round(competitorFee).toLocaleString('es-CO')"></span>
+                                </div>
+                            </div>
+
+                            <!-- Fincomercio -->
+                            <div class="bg-emerald-50/40 p-5 rounded-2xl border border-emerald-200 flex flex-col justify-between relative overflow-hidden shadow-sm">
+                                <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-bold px-2.5 py-0.5 rounded-bl font-mono">
+                                    PROPUESTA FC
+                                </div>
+                                <div>
+                                    <span class="text-xs text-emerald-700 font-bold">Propuesta Fincomercio</span>
+                                    <p class="text-[10px] text-emerald-600/80 mt-0.5 font-semibold" x-text="'Tasa parametrizada: ' + customFincoRate + '% NMV'"></p>
+                                </div>
+                                <div class="mt-5">
+                                    <span class="text-[10px] text-emerald-500 block uppercase font-bold tracking-wider">Cuota Mensual</span>
+                                    <span class="text-2xl font-extrabold text-emerald-700" x-text="'$ ' + Math.round(fincomercioFee).toLocaleString('es-CO')"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resultados de Ahorro Neto -->
+                        <div class="bg-emerald-600 text-white p-5 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md">
+                            <div>
+                                <span class="text-xs font-bold text-emerald-100 block">Beneficio de Ahorro para el Asociado</span>
+                                <p class="text-[10px] text-emerald-200 mt-0.5" x-text="'Proyección calculada a ' + simTerm + ' meses de vigencia'"></p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-emerald-100 uppercase font-bold block">Ahorro Neto Total</span>
+                                <span class="text-2xl font-black text-white" x-text="'$ ' + Math.round(totalSavings).toLocaleString('es-CO') + ' COP'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ficha Técnica de la Entidad Comparada -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Detalles de Política Pública de la Entidad</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <span class="text-slate-400 block font-semibold text-[10px]">Nicho de Uso:</span>
+                                <strong class="text-slate-700" x-text="activeCompetitorObj.niche"></strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <span class="text-slate-400 block font-semibold text-[10px]">Metodología:</span>
+                                <strong class="text-slate-700" x-text="activeCompetitorObj.process"></strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <span class="text-slate-400 block font-semibold text-[10px]">Tiempo de Respuesta:</span>
+                                <strong class="text-slate-700" x-text="activeCompetitorObj.time"></strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <span class="text-slate-400 block font-semibold text-[10px]">Foco Comercial:</span>
+                                <strong class="text-emerald-700 font-bold" x-text="activeCompetitorObj.badge"></strong>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-slate-50/50 rounded-xl border border-slate-100 text-xs">
+                            <span class="text-slate-500 font-bold block mb-1">Requisitos de Otorgamiento:</span>
+                            <p class="text-slate-600 leading-relaxed font-medium" x-text="activeCompetitorObj.requirements"></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 4. SECCIÓN: MEJORES PRÁCTICAS Y PROPUESTA FINCOMERCIO -->
+        <div x-show="activeTab === 'strategies'" class="space-y-6">
+            
+            <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <h3 class="font-bold text-slate-900 text-base">Propuesta de Adopción e Implementación</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Estrategias diseñadas para capturar cuota de mercado en Fincomercio, incorporando las mejores prácticas del benchmark nacional.
+                </p>
+            </div>
+
+            <div class="space-y-6">
+                <template x-for="strat in fincomercioStrategies" :key="strat.id">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <!-- Header de la Iniciativa -->
+                        <div class="p-5 flex justify-between items-center bg-slate-50 border-b border-slate-200">
+                            <div class="flex items-center gap-3">
+                                <span 
+                                    class="font-black w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-sm"
+                                    :class="{
+                                        'bg-blue-600 text-white': strat.id === 'A',
+                                        'bg-teal-600 text-white': strat.id === 'B',
+                                        'bg-emerald-600 text-white': strat.id === 'C',
+                                        'bg-amber-600 text-white': strat.id === 'D',
+                                        'bg-rose-600 text-white': strat.id === 'E'
+                                    }"
+                                    x-text="strat.id"
+                                ></span>
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-700 px-2.5 py-0.5 rounded-full" x-text="'Pilar: ' + strat.pillar"></span>
+                                    <h4 class="font-extrabold text-sm md:text-base text-slate-900 mt-1.5" x-text="strat.title"></h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contenido -->
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-12 gap-6 text-xs">
+                            
+                            <!-- Práctica de Mercado -->
+                            <div class="md:col-span-5 space-y-2">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                    La Práctica del Mercado Competidor
+                                </span>
+                                <p class="text-slate-600 leading-relaxed font-semibold bg-slate-50 p-4 rounded-xl border border-slate-200" x-text="strat.marketPractice">
+                                </p>
+                            </div>
+
+                            <!-- Aplicación Fincomercio -->
+                            <div class="md:col-span-7 space-y-2">
+                                <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">
+                                    Estrategia de Aplicación en Fincomercio
+                                </span>
+                                <div class="text-slate-600 leading-relaxed font-medium bg-emerald-50/30 p-4 rounded-xl border border-emerald-100 space-y-3">
+                                    <p x-text="strat.implementation"></p>
+                                    
+                                    <!-- Detalles Adicionales Especiales por Pilar -->
+                                    <div x-show="strat.id === 'D'" class="border-t border-emerald-200/50 pt-2.5 mt-2 space-y-1">
+                                        <span class="text-[10px] text-emerald-800 font-bold uppercase block">Flexibilidad Clave de Taxis:</span>
+                                        <ul class="list-disc list-inside space-y-1 text-slate-700 text-[11px]">
+                                            <li><strong>Financiar hasta el 90%:</strong> Reduciendo barreras contra el 70% tradicional del mercado.</li>
+                                            <li><strong>Antigüedad del taxi hasta 8 años:</strong> Capturando el mercado de usados desatendido por Davivienda (6 años máx).</li>
+                                        </ul>
+                                    </div>
+
+                                    <div x-show="strat.id === 'C'" class="border-t border-emerald-200/50 pt-2.5 mt-2 space-y-1">
+                                        <span class="text-[10px] text-emerald-800 font-bold uppercase block">Fondeo de Desarrollo Verde:</span>
+                                        <p class="text-[11px] text-slate-700">
+                                            Apalancarse en fondos internacionales multilaterales que brinden liquidez barata exclusiva para ecotransporte, minimizando fluctuaciones y tasas de default.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Métricas y Priorización -->
+                        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-4 text-xs text-slate-500 font-medium">
+                            <div>
+                                <span>Impacto Proyectado:</span>
+                                <strong class="text-slate-800 ml-1.5" x-text="strat.impact"></strong>
+                            </div>
+                            <div class="h-4 w-px bg-slate-200 hidden md:block"></div>
+                            <div>
+                                <span>Costo de Desarrollo:</span>
+                                <strong class="text-slate-800 ml-1.5" x-text="strat.cost"></strong>
+                            </div>
+                            <div class="h-4 w-px bg-slate-200 hidden md:block"></div>
+                            <div>
+                                <span>Prioridad de Lanzamiento:</span>
+                                <strong class="text-emerald-700 ml-1.5 font-bold" x-text="strat.priority"></strong>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER GENERAL -->
+    <footer class="bg-white border-t border-slate-200 py-6 px-6 mt-12 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 text-slate-400 font-medium">
+            <p>© 2026 Investigación de mercados • Mercadeo y comunicaciones </p>
+            <div class="flex gap-4">
+                <span class="hover:text-slate-600 cursor-pointer"></span>
+                <span>•</span>
+                <span class="hover:text-slate-600 cursor-pointer"></span>
+                <span>•</span>
+                <span class="hover:text-slate-600 cursor-pointer"></span>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
